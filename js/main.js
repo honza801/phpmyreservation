@@ -263,6 +263,7 @@ function create_user()
 {
 	var user_name = $('#user_name_input').val();
 	var user_email = $('#user_email_input').val();
+	var user_phone = $('#user_phone_input').val();
 	var user_password = $('#user_password_input').val();
 	var user_password_confirm = $('#user_password_confirm_input').val();
 
@@ -286,7 +287,7 @@ function create_user()
 	{
 		$('#new_user_message_p').html('<img src="img/loading.gif" alt="Loading"> Creating user...').slideDown('fast');
 
-		$.post('login.php?create_user', { user_name: user_name, user_email: user_email, user_password: user_password, user_secret_code: user_secret_code }, function(data)
+		$.post('login.php?create_user', { user_name: user_name, user_email: user_email, user_phone: user_phone, user_password: user_password, user_secret_code: user_secret_code }, function(data)
 		{
 			if(data == 1)
 			{
@@ -712,6 +713,7 @@ function change_user_details()
 {
 	var user_name = $('#user_name_input').val();
 	var user_email = $('#user_email_input').val();
+	var user_phone = $('#user_phone_input').val();
 	var user_password = $('#user_password_input').val();
 	var user_password_confirm = $('#user_password_confirm_input').val();
 
@@ -726,7 +728,7 @@ function change_user_details()
 	{	
 		$('#user_details_message_p').html('<img src="img/loading.gif" alt="Loading"> Saving and refreshing...').slideDown('fast');
 
-		$.post('cp.php?change_user_details', { user_name: user_name, user_email: user_email, user_password: user_password }, function(data)
+		$.post('cp.php?change_user_details', { user_name: user_name, user_email: user_email, user_phone: user_phone, user_password: user_password }, function(data)
 		{
 			if(data == 1)
 			{

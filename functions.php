@@ -62,6 +62,15 @@ function validate_user_email($user_email)
 	}
 }
 
+function validate_user_phone($user_phone)
+{
+	if(preg_match('/^[\d ]{9,11}$/', $user_phone))
+	{
+		return(true);
+	}
+	return false;
+}
+
 function validate_user_password($user_password)
 {
 	if(strlen($user_password) > 3 && trim($user_password) != '')
@@ -109,13 +118,17 @@ function get_login_data($data)
 	{
 		return($_COOKIE[global_cookie_prefix . '_user_email']);
 	}
+	elseif($data == 'user_phone' && isset($_COOKIE[global_cookie_prefix . '_user_phone']))
+	{
+		return($_COOKIE[global_cookie_prefix . '_user_phone']);
+	}
 	elseif($data == 'user_password' && isset($_COOKIE[global_cookie_prefix . '_user_password']))
 	{
 		return($_COOKIE[global_cookie_prefix . '_user_password']);
 	}
 }
 
-function login($user_email, $user_password, $user_remember)
+function login($user_email, $user_phone, $user_password, $user_remember)
 {
 	$user_password_encrypted = encrypt_password($user_password);
 	$user_password = add_salt($user_password);
@@ -129,6 +142,7 @@ function login($user_email, $user_password, $user_remember)
 			$_SESSION['user_id'] = $user['user_id'];
 			$_SESSION['user_is_admin'] = $user['user_is_admin'];
 			$_SESSION['user_email'] = $user['user_email'];
+			$_SESSION['user_phone'] = $user['user_phone'];
 			$_SESSION['user_name'] = $user['user_name'];
 			$_SESSION['user_reservation_reminder'] = $user['user_reservation_reminder'];
 			$_SESSION['logged_in'] = '1';
@@ -138,6 +152,7 @@ function login($user_email, $user_password, $user_remember)
 				$user_password = strip_salt($user['user_password']);
 
 				setcookie(global_cookie_prefix . '_user_email', $user['user_email'], time() + 3600 * 24 * intval(global_remember_login_days));
+				setcookie(global_cookie_prefix . '_user_phone', $user['user_phone'], time() + 3600 * 24 * intval(global_remember_login_days));
 				setcookie(global_cookie_prefix . '_user_password', $user_password, time() + 3600 * 24 * intval(global_remember_login_days));
 			}
 
@@ -173,10 +188,11 @@ function logout()
 {
 	session_unset();
 	setcookie(global_cookie_prefix . '_user_email', '', time() - 3600);
+	setcookie(global_cookie_prefix . '_user_phone', '', time() - 3600);
 	setcookie(global_cookie_prefix . '_user_password', '', time() - 3600);
 }
 
-function create_user($user_name, $user_email, $user_password, $user_secret_code)
+function create_user($user_name, $user_email, $user_phone, $user_password, $user_secret_code)
 {
 	if(validate_user_name($user_name) != true)
 	{
@@ -185,6 +201,10 @@ function create_user($user_name, $user_email, $user_password, $user_secret_code)
 	elseif(validate_user_email($user_email) != true)
 	{
 		return('<span class="error_span">Email must be a valid email address and be no more than 50 characters long</span>');
+	}
+	elseif(validate_user_phone($user_phone) != true)
+	{
+		return('<span class="error_span">Phone must be a valid number, between 9 and 11 characters long.</span>');
 	}
 	elseif(validate_user_password($user_password) != true)
 	{
@@ -217,7 +237,12 @@ function create_user($user_name, $user_email, $user_password, $user_secret_code)
 
 		$user_password = encrypt_password($user_password);
 
-		mysql_query("INSERT INTO " . global_mysql_users_table . " (user_is_admin,user_email,user_password,user_name,user_reservation_reminder) VALUES ($user_is_admin,'$user_email','$user_password','$user_name','0')")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+		$query = "INSERT INTO " . global_mysql_users_table . 
+			" (user_is_admin,user_email,user_phone,user_password,user_name,user_reservation_reminder)" .
+			" VALUES ($user_is_admin,'$user_email','$user_phone', '$user_password','$user_name','0')";
+
+		mysql_query($query)
+		or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 		$user_password = strip_salt($user_password);
 
@@ -361,11 +386,11 @@ function list_users()
 {
 	$query = mysql_query("SELECT * FROM " . global_mysql_users_table . " ORDER BY user_is_admin DESC, user_name")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
-	$users = '<table id="users_table"><tr><th>ID</th><th>Admin</th><th>Name</th><th>Email</th><th>Reminders</th><th>Usage</th><th>Cost</th><th></th></tr>';
+	$users = '<table id="users_table"><tr><th>ID</th><th>Admin</th><th>Name</th><th>Email</th><th>Phone</th><th>Reminders</th><th>Usage</th><th>Cost</th><th></th></tr>';
 
 	while($user = mysql_fetch_array($query))
 	{
-		$users .= '<tr id="user_tr_' . $user['user_id'] . '"><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_id'] . '</label></td><td>' . $user['user_is_admin'] . '</td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_name'] . '</label></td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_email'] . '</label></td><td>' . $user['user_reservation_reminder'] . '</td><td>' . count_reservations($user['user_id']) . '</td><td>' . cost_reservations($user['user_id']) . ' ' . global_currency . '</td><td><input type="radio" name="user_radio" class="user_radio" id="user_radio_' . $user['user_id'] . '" value="' . $user['user_id'] . '"></td></tr>';
+		$users .= '<tr id="user_tr_' . $user['user_id'] . '"><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_id'] . '</label></td><td>' . $user['user_is_admin'] . '</td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_name'] . '</label></td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_email'] . '</label></td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_phone'] . '</label></td><td>' . $user['user_reservation_reminder'] . '</td><td>' . count_reservations($user['user_id']) . '</td><td>' . cost_reservations($user['user_id']) . ' ' . global_currency . '</td><td><input type="radio" name="user_radio" class="user_radio" id="user_radio_' . $user['user_id'] . '" value="' . $user['user_id'] . '"></td></tr>';
 	}
 
 	$users .= '</table>';
@@ -532,7 +557,7 @@ function toggle_reservation_reminder()
 	return(1);
 }
 
-function change_user_details($user_name, $user_email, $user_password)
+function change_user_details($user_name, $user_email, $user_phone, $user_password)
 {
 	$user_id = $_SESSION['user_id'];
 
@@ -543,6 +568,10 @@ function change_user_details($user_name, $user_email, $user_password)
 	if(validate_user_email($user_email) != true)
 	{
 		return('<span class="error_span">Email must be a valid email address and be no more than 50 characters long</span>');
+	}
+	elseif(validate_user_phone($user_phone) != true)
+	{
+		return('<span class="error_span">Phone must be a valid number, between 9 and 11 characters long.</span>');
 	}
 	elseif(validate_user_password($user_password) != true && !empty($user_password))
 	{
@@ -560,23 +589,25 @@ function change_user_details($user_name, $user_email, $user_password)
 	{
 		if(empty($user_password))
 		{
-			mysql_query("UPDATE " . global_mysql_users_table . " SET user_name='$user_name', user_email='$user_email' WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+			mysql_query("UPDATE " . global_mysql_users_table . " SET user_name='$user_name', user_email='$user_email', user_phone='$user_phone' WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 		}
 		else
 		{
 			$user_password = encrypt_password($user_password);
 
-			mysql_query("UPDATE " . global_mysql_users_table . " SET user_name='$user_name', user_email='$user_email', user_password='$user_password' WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+			mysql_query("UPDATE " . global_mysql_users_table . " SET user_name='$user_name', user_email='$user_email', user_phone='$user_phone', user_password='$user_password' WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 		}
 
 		mysql_query("UPDATE " . global_mysql_reservations_table . " SET reservation_user_name='$user_name', reservation_user_email='$user_email' WHERE reservation_user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 		$_SESSION['user_name'] = $user_name;
+		$_SESSION['user_phone'] = $user_phone;
 		$_SESSION['user_email'] = $user_email;
 
 		$user_password = strip_salt($user_password);
 
 		setcookie(global_cookie_prefix . '_user_email', $user_email, time() + 3600 * 24 * intval(global_remember_login_days));
+		setcookie(global_cookie_prefix . '_user_phone', $user_phone, time() + 3600 * 24 * intval(global_remember_login_days));
 		setcookie(global_cookie_prefix . '_user_password', $user_password, time() + 3600 * 24 * intval(global_remember_login_days));
 
 		return(1);

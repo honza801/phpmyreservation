@@ -5,9 +5,10 @@ include_once('main.php');
 if(isset($_GET['login']))
 {
 	$user_email = mysql_real_escape_string($_POST['user_email']);
+	$user_phone = mysql_real_escape_string($_POST['user_phone']);
 	$user_password = mysql_real_escape_string($_POST['user_password']);
 	$user_remember = $_POST['user_remember'];
-	echo login($user_email, $user_password, $user_remember);
+	echo login($user_email, $user_phone, $user_password, $user_remember);
 }
 elseif(isset($_GET['logout']))
 {
@@ -17,9 +18,10 @@ elseif(isset($_GET['create_user']))
 {
 	$user_name = mysql_real_escape_string(trim($_POST['user_name']));
 	$user_email = mysql_real_escape_string($_POST['user_email']);
+	$user_phone = mysql_real_escape_string($_POST['user_phone']);
 	$user_password = mysql_real_escape_string($_POST['user_password']);
 	$user_secret_code = $_POST['user_secret_code'];
-	echo create_user($user_name, $user_email, $user_password, $user_secret_code);
+	echo create_user($user_name, $user_email, $user_phone, $user_password, $user_secret_code);
 }
 elseif(isset($_GET['new_user']))
 {
@@ -35,6 +37,8 @@ elseif(isset($_GET['new_user']))
 	<input type="text" id="user_name_input"><br><br>
 	<label for="user_email_input">Email:</label><br>
 	<input type="text" id="user_email_input" autocapitalize="off"><br><br>
+	<label for="user_phone_input">Phone:</label><br>
+	<input type="text" id="user_phone_input" autocapitalize="off"><br><br>
 	<label for="user_password_input">Password:</label><br>
 	<input type="password" id="user_password_input"><br><br>
 	<label for="user_password_confirm_input">Confirm password:</label><br>

@@ -49,8 +49,9 @@ elseif(isset($_GET['change_user_details']))
 {
 	$user_name = mysql_real_escape_string(trim($_POST['user_name']));
 	$user_email = mysql_real_escape_string($_POST['user_email']);
+	$user_phone = mysql_real_escape_string($_POST['user_phone']);
 	$user_password = mysql_real_escape_string($_POST['user_password']);
-	echo change_user_details($user_name, $user_email, $user_password);
+	echo change_user_details($user_name, $user_email, $user_phone, $user_password);
 }
 else
 {
@@ -133,7 +134,9 @@ else
 	<label for="user_name_input">Name:</label><br>
 	<input type="text" id="user_name_input" value="<?php echo $_SESSION['user_name']; ?>"><br><br>
 	<label for="user_email_input">Email:</label><br>
-	<input type="text" id="user_email_input" autocapitalize="off" value="<?php echo $_SESSION['user_email']; ?>">
+	<input type="text" id="user_email_input" autocapitalize="off" value="<?php echo $_SESSION['user_email']; ?>"><br><br>
+	<label for="user_phone_input">Phone:</label><br>
+	<input type="text" id="user_phone_input" autocapitalize="off" value="<?php echo $_SESSION['user_phone']; ?>">
 	</div><div>
 	<label for="user_password_input">Password:</label><br>
 	<input type="password" id="user_password_input"><br><br>
