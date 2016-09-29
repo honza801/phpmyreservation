@@ -31,8 +31,7 @@ elseif($_SESSION['user_is_admin'] == '1' && isset($_GET['delete_all']))
 }
 elseif($_SESSION['user_is_admin'] == '1' && isset($_GET['save_system_configuration']))
 {
-	$price = mysql_real_escape_string($_POST['price']);
-	echo save_system_configuration($price);
+	echo save_system_configuration($_POST);
 }
 elseif(isset($_GET['get_usage']))
 {
@@ -63,38 +62,25 @@ else
 ?>
 
 		<h3>User administration</h3>
-
 		<div id="users_div"><?php echo list_users(); ?></div>
-
 		<p class="center_p"><input type="button" class="small_button blue_button" id="reset_user_password_button" value="Reset password"> <input type="button" class="small_button blue_button" id="change_user_permissions_button" value="Change permissions"> <input type="button" class="small_button" id="delete_user_reservations_button" value="Delete reservations"> <input type="button" class="small_button" id="delete_user_button" value="Delete user"></p>
 		<p class="center_p" id="user_administration_message_p"></p>
-
 		<hr>
-
-		<h3>Database administration</h3>
-
+		
+        <h3>Database administration</h3>
 		<p class="smalltext_p">These will require a confirmation. Your user and reservations will not be deleted unless you delete everything.</p>
-
 		<p><input type="button" class="small_button" id="delete_all_reservations_button" value="Delete all reservations"> <input type="button" class="small_button" id="delete_all_users_button" value="Delete all users"> <input type="button" class="small_button" id="delete_everything_button" value="Delete everything"></p>
-
 		<p id="database_administration_message_p"></p>
-
 		<hr>
 
 		<h3>System configuration</h3>
-
 		<p class="smalltext_p">Changing the price will not affect previous reservations.</p>
-
 		<form action="." id="system_configuration_form"><p>
-
 		<input type="text" id="price_input" value="<?php echo get_configuration('price'); ?>"> <label for="price_input">Price per reservation, in <?php echo global_currency; ?></label><br><br>
-
+		<input type="text" id="max_reservations_input" value="<?php echo get_configuration('max_reservations'); ?>"> <label for="max_reservations_input">Max reservations per week</label><br><br>
 		<input type="submit" class="blue_button small_button" value="Save configuration">
-
 		</p></form>
-
 		<p id="system_configuration_message_p"></p>
-
 		<hr class="blue_hr thick_hr">
 
 <?php

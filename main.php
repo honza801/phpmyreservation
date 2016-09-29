@@ -32,6 +32,7 @@ session_start();
 // Configuration
 
 define('global_price', get_configuration('price'));
+define('global_max_reservations', get_configuration('max_reservations'));
 
 // Date
 

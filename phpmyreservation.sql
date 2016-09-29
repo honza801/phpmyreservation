@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `phpmyreservation_configuration` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `price` float NOT NULL,
+  `max_reservations` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=2 ;
 
@@ -36,8 +37,8 @@ CREATE TABLE IF NOT EXISTS `phpmyreservation_configuration` (
 -- Dumping data for table `phpmyreservation_configuration`
 --
 
-INSERT INTO `phpmyreservation_configuration` (`id`, `price`) VALUES
-(1, 2);
+INSERT INTO `phpmyreservation_configuration` (`id`, `price`, `max_reservations`) VALUES
+(1, 2, 8);
 
 -- --------------------------------------------------------
 

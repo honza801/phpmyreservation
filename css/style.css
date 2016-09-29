@@ -391,6 +391,12 @@ input#price_input
 	text-align: center;
 }
 
+input#max_reservations_input
+{
+	width: 20px;
+	text-align: center;
+}
+
 input#reservation_today_button
 {
 	visibility: hidden;	

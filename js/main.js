@@ -615,12 +615,15 @@ function delete_all(delete_data)
 
 function save_system_configuration()
 {
-	var price = $('#price_input').val();
+	var post_data = {
+        price: $('#price_input').val(),
+	    max_reservations: $('#max_reservations_input').val()
+    }
 
 	$('#system_configuration_message_p').html('<img src="img/loading.gif" alt="Loading"> Saving...');
 	$('#system_configuration_message_p').slideDown('fast');
 
-	$.post('cp.php?save_system_configuration', { price: price }, function(data)
+	$.post('cp.php?save_system_configuration', post_data, function(data)
 	{
 		if(data == 1)
 		{
@@ -636,7 +639,6 @@ function save_system_configuration()
 		}
 		else
 		{
-			input_focus('#price_input');
 			$('#system_configuration_message_p').html(data);
 		}
 	});

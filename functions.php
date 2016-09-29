@@ -74,8 +74,9 @@ function validate_price($price)
 {
 	if(is_numeric($price))
 	{
-		return(true);
+		return true;
 	}
+    return false;
 }
 
 // User validation
@@ -292,6 +293,7 @@ function make_reservation($week, $day, $time)
 	$user_email = $_SESSION['user_email'];
 	$user_name = $_SESSION['user_name'];
 	$price = global_price;
+	$max_reservations = global_max_reservations;
 
 	if($week == '0' && $day == '0' && $time == '0')
 	{
@@ -311,17 +313,16 @@ function make_reservation($week, $day, $time)
 	{
 		$query = mysql_query("SELECT * FROM " . global_mysql_reservations_table . " WHERE reservation_week='$week' AND reservation_day='$day' AND reservation_time='$time'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
-		if(mysql_num_rows($query) < 1)
-		{
+		if(mysql_num_rows($query) > 0) {
+			return('Someone else just reserved this time');
+        } elseif (count_week_reservations($user_id, $week) >= $max_reservations) {
+            return('You have reached maximum week reservations');
+		} else {
 			$year = global_year;
 
 			mysql_query("INSERT INTO " . global_mysql_reservations_table . " (reservation_made_time,reservation_year,reservation_week,reservation_day,reservation_time,reservation_price,reservation_user_id,reservation_user_email,reservation_user_name) VALUES (now(),'$year','$week','$day','$time','$price','$user_id','$user_email','$user_name')")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 			return(1);
-		}
-		else
-		{
-			return('Someone else just reserved this time');
 		}
 	}
 }
@@ -447,18 +448,25 @@ function delete_all($data)
 	return(1);
 }
 
-function save_system_configuration($price)
+function save_system_configuration($data)
 {
-	if(validate_price($price) != true)
-	{
-		return('<span class="error_span">Price must be a number (use . and not , if you want to use decimals)</span>');
-	}
-	else
-	{
-		mysql_query("UPDATE " . global_mysql_configuration_table . " SET price='$price'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
-	}
+    foreach ($data as $key => $value) {
+        if($key == 'price') {
+            if(validate_price($value) == true) {
+                mysql_query("UPDATE " . global_mysql_configuration_table . " SET price='" . mysql_real_escape_string($value) . "'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+            } else {
+                return('<span class="error_span">Price must be a number (use . and not , if you want to use decimals)</span>');
+            }
+        } elseif($key == 'max_reservations') {
+            if(is_numeric($value)) {
+                mysql_query("UPDATE " . global_mysql_configuration_table . " SET max_reservations='" . mysql_real_escape_string(intval($value)) . "'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+            } else {
+                return('<span class="error_span">Max reservations must be a number.</span>');
+            }
+        }
+    }
 
-	return(1);
+    return(1);
 }
 
 // User control panel
@@ -472,6 +480,14 @@ function get_usage()
 function count_reservations($user_id)
 {
 	$query = mysql_query("SELECT * FROM " . global_mysql_reservations_table . " WHERE reservation_user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+	$count = mysql_num_rows($query);
+	return($count);
+}
+
+function count_week_reservations($user_id, $week)
+{
+	$query = mysql_query("SELECT * FROM " . global_mysql_reservations_table . " WHERE reservation_user_id='$user_id' and reservation_week='$week'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+    error_log($query);
 	$count = mysql_num_rows($query);
 	return($count);
 }
