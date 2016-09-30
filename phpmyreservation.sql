@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `phpmyreservation_reservations` (
 CREATE TABLE IF NOT EXISTS `phpmyreservation_users` (
   `user_id` int(10) NOT NULL AUTO_INCREMENT,
   `user_is_admin` tinyint(1) NOT NULL,
+  `user_active` tinyint(1) NOT NULL,
   `user_email` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `user_phone` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
   `user_password` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,

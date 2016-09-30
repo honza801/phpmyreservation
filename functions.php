@@ -133,7 +133,9 @@ function login($user_email, $user_phone, $user_password, $user_remember)
 	$user_password_encrypted = encrypt_password($user_password);
 	$user_password = add_salt($user_password);
 	
-	$query = mysql_query("SELECT * FROM " . global_mysql_users_table . " WHERE user_email='$user_email' AND user_password='$user_password_encrypted' OR user_email='$user_email' AND user_password='$user_password'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+	$q = "SELECT * FROM " . global_mysql_users_table
+		. " WHERE ((user_email='$user_email' AND user_password='$user_password_encrypted') OR (user_email='$user_email' AND user_password='$user_password')) AND user_active=1";
+	$query = mysql_query($q) or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 	if(mysql_num_rows($query) == 1)
 	{
@@ -162,7 +164,8 @@ function login($user_email, $user_phone, $user_password, $user_remember)
 
 function login_auth_user($auth_user)
 {
-	$query = mysql_query("SELECT * FROM " . global_mysql_users_table . " WHERE user_name='$auth_user'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+	$q = "SELECT * FROM " . global_mysql_users_table . " WHERE user_name='$auth_user' and user_active=1";
+	$query = mysql_query($q) or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 	if(mysql_num_rows($query) == 1)
 	{
@@ -235,11 +238,11 @@ function create_user($user_name, $user_email, $user_phone, $user_password, $user
 	{
 		return('<span class="error_span">Phone must be a valid number, between 9 and 11 characters long.</span>');
 	}
-	elseif(validate_user_password($user_password) != true)
+	elseif(global_admin_verify_new_user == 0 and validate_user_password($user_password) != true)
 	{
 		return('<span class="error_span">Password must be at least 4 characters</span>');
 	}
-	elseif(global_secret_code != '0' && $user_secret_code != global_secret_code)
+	elseif(global_admin_verify_new_user == 0 and global_secret_code != '0' and $user_secret_code != global_secret_code)
 	{
 		return('<span class="error_span">Wrong secret code</span>');
 	}
@@ -257,18 +260,20 @@ function create_user($user_name, $user_email, $user_phone, $user_password, $user
 
 		if(mysql_num_rows($query) == 0)
 		{
-			$user_is_admin = '1';
+			$user_is_admin = 1;
+			$user_active = 1;
 		}
 		else
 		{
-			$user_is_admin = '0';
+			$user_is_admin = 0;
+			$user_active = global_admin_verify_new_user?0:1;
 		}
 
 		$user_password = encrypt_password($user_password);
 
 		$query = "INSERT INTO " . global_mysql_users_table . 
-			" (user_is_admin,user_email,user_phone,user_password,user_name,user_reservation_reminder)" .
-			" VALUES ($user_is_admin,'$user_email','$user_phone', '$user_password','$user_name','0')";
+			" (user_is_admin,user_email,user_phone,user_password,user_name,user_reservation_reminder,user_active)" .
+			" VALUES ($user_is_admin,'$user_email','$user_phone', '$user_password','$user_name',0,$user_active)";
 
 		mysql_query($query)
 		or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
@@ -415,11 +420,20 @@ function list_users()
 {
 	$query = mysql_query("SELECT * FROM " . global_mysql_users_table . " ORDER BY user_is_admin DESC, user_name")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
-	$users = '<table id="users_table"><tr><th>ID</th><th>Admin</th><th>Name</th><th>Email</th><th>Phone</th><th>Reminders</th><th>Usage</th><th>Cost</th><th></th></tr>';
+	$users = '<table id="users_table"><tr><th>ID</th><th>Active</th><th>Admin</th><th>Name</th><th>Email</th><th>Phone</th><th>Reminders</th><th>Usage</th><th>Cost</th><th></th></tr>';
 
 	while($user = mysql_fetch_array($query))
 	{
-		$users .= '<tr id="user_tr_' . $user['user_id'] . '"><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_id'] . '</label></td><td>' . $user['user_is_admin'] . '</td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_name'] . '</label></td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_email'] . '</label></td><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_phone'] . '</label></td><td>' . $user['user_reservation_reminder'] . '</td><td>' . count_reservations($user['user_id']) . '</td><td>' . cost_reservations($user['user_id']) . ' ' . global_currency . '</td><td><input type="radio" name="user_radio" class="user_radio" id="user_radio_' . $user['user_id'] . '" value="' . $user['user_id'] . '"></td></tr>';
+		$users .= '<tr id="user_tr_' . $user['user_id'] . '"><td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_id'] . '</label></td>';
+		$users .= '<td>' . $user['user_active'] . '</td>';
+		$users .= '<td>' . $user['user_is_admin'] . '</td>';
+		$users .= '<td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_name'] . '</label></td>';
+		$users .= '<td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_email'] . '</label></td>';
+		$users .= '<td><label for="user_radio_' . $user['user_id'] . '">' . $user['user_phone'] . '</label></td>';
+		$users .= '<td>' . $user['user_reservation_reminder'] . '</td>';
+		$users .= '<td>' . count_reservations($user['user_id']) . '</td>';
+		$users .= '<td>' . cost_reservations($user['user_id']) . ' ' . global_currency . '</td>';
+		$users .= '<td><input type="radio" name="user_radio" class="user_radio" id="user_radio_' . $user['user_id'] . '" value="' . $user['user_id'] . '"></td></tr>';
 	}
 
 	$users .= '</table>';
@@ -453,6 +467,20 @@ function change_user_permissions($user_id)
 	else
 	{
 		mysql_query("UPDATE " . global_mysql_users_table . " SET user_is_admin = 1 - user_is_admin WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+
+		return(1);
+	}
+}
+
+function change_user_active($user_id)
+{
+	if($user_id == $_SESSION['user_id'])
+	{
+		return('<span class="error_span">Sorry, you can\'t use your superuser powers to remove them</span>');
+	}
+	else
+	{
+		mysql_query("UPDATE " . global_mysql_users_table . " SET user_active = 1 - user_active WHERE user_id='$user_id'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
 
 		return(1);
 	}

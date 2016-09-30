@@ -530,6 +530,36 @@ function change_user_permissions()
 	}
 }
 
+function change_user_active()
+{
+	if(typeof $(".user_radio:checked").val() !='undefined')
+	{
+		var user_id = $(".user_radio:checked").val();
+
+		$('#user_administration_message_p').html('<img src="img/loading.gif" alt="Loading"> Changing active...').slideDown('fast');
+
+		$.post('cp.php?change_user_active', { user_id: user_id }, function(data)
+		{
+			if(data == 1)
+			{
+				setTimeout(function()
+				{
+					list_users();
+					$('#user_administration_message_p').html('Active changed successfully. The user must re-login/refresh to get the new permissions');
+				}, 1000);
+			}
+			else
+			{
+				$('#user_administration_message_p').html(data);
+			}
+		});
+	}
+	else
+	{
+		$('#user_administration_message_p').html('<span class="error_span">You must pick a user</span>').slideDown('fast');
+	}
+}
+
 function delete_user_data(delete_data)
 {
 	if(typeof $(".user_radio:checked").val() !='undefined')
@@ -840,6 +870,7 @@ $(document).ready( function()
 	$(document).on('click', '#reservation_today_button', function() { showweek(global_week_number, 'today'); });
 	$(document).on('click', '#reset_user_password_button', function() { reset_user_password(); });
 	$(document).on('click', '#change_user_permissions_button', function() { change_user_permissions(); });
+	$(document).on('click', '#change_user_active_button', function() { change_user_permissions(); });
 	$(document).on('click', '#delete_user_reservations_button', function() { delete_user_data('reservations'); });
 	$(document).on('click', '#delete_user_button', function() { delete_user_data('user'); });
 	$(document).on('click', '#delete_all_reservations_button', function() { delete_all('reservations'); });

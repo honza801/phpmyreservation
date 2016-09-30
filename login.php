@@ -52,7 +52,7 @@ elseif(isset($_GET['new_user']))
 
 <?php
 
-	if(global_secret_code != '0')
+	if(global_admin_verify_new_user == 0 and global_secret_code != '0')
 	{
 		echo '<label for="user_secret_code_input">Secret code: <sup><a href="." id="user_secret_code_a" tabindex="-1">What\'s this?</a></sup></label><br><input type="password" id="user_secret_code_input"><br><br>';
 	}
