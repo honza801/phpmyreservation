@@ -106,7 +106,7 @@ else
 
 	<div id="usage_div"><?php echo get_usage(); ?></div>
 
-	<p><input type="button" class="blue_button small_button" id="add_one_reservation_button" value="Add 1 to my reservations" <?= global_enable_add_empty_reservation?:"disabled" ?>></p>
+	<p><input type="button" class="blue_button small_button" id="add_one_reservation_button" value="Add 1 to my reservations" <?= global_enable_add_empty_reservation?"":"disabled" ?>></p>
 
 	<p id="usage_message_p"></p>
 
@@ -142,7 +142,7 @@ else
 
 	<div id="user_details_div"><div>
 	<label for="user_name_input">Name:</label><br>
-	<input type="text" id="user_name_input" value="<?php echo $_SESSION['user_name']; ?>"><br><br>
+	<input type="text" id="user_name_input" value="<?php echo $_SESSION['user_name']; ?>" <?= $_SERVER['PHP_AUTH_USER']?"disabled":"" ?>><br><br>
 	<label for="user_email_input">Email:</label><br>
 	<input type="text" id="user_email_input" autocapitalize="off" value="<?php echo $_SESSION['user_email']; ?>"><br><br>
 	<label for="user_phone_input">Phone:</label><br>

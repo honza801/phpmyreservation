@@ -40,7 +40,7 @@ elseif(isset($_GET['new_user']))
 	<form action="." id="new_user_form"><p>
 
 	<label for="user_name_input">Name:</label><br>
-	<input type="text" id="user_name_input"><br><br>
+	<input type="text" id="user_name_input" value="<?= $_SERVER['PHP_AUTH_USER']?:"" ?>" <?= $_SERVER['PHP_AUTH_USER']?"disabled":"" ?>><br><br>
 	<label for="user_email_input">Email:</label><br>
 	<input type="text" id="user_email_input" autocapitalize="off"><br><br>
 	<label for="user_phone_input">Phone:</label><br>
