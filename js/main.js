@@ -12,6 +12,11 @@ function showlogin()
 	page_load();
 	div_hide('#content_div');
 
+	$.get('login.php?auth', function(data) {
+		if (data) {
+			window.location.replace('.');
+		}
+	});
 	$.get('login.php', function(data)
 	{
 		$('#content_div').html(data); 

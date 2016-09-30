@@ -10,6 +10,12 @@ if(isset($_GET['login']))
 	$user_remember = $_POST['user_remember'];
 	echo login($user_email, $user_phone, $user_password, $user_remember);
 }
+elseif(isset($_GET['auth']))
+{
+	if(isset($_SERVER['PHP_AUTH_USER'])) {
+		echo login_auth_user($_SERVER['PHP_AUTH_USER']);
+	}
+}
 elseif(isset($_GET['logout']))
 {
 	logout();

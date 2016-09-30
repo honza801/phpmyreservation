@@ -48,7 +48,7 @@ function modify_email($email)
 
 function validate_user_name($user_name)
 {
-	if(preg_match('/^[a-z æøåÆØÅ]{2,12}$/i', $user_name))
+	if(preg_match('/^[a-z æøåÆØÅ0-9]{3,12}$/i', $user_name))
 	{
 		return(true);
 	}
@@ -160,6 +160,35 @@ function login($user_email, $user_phone, $user_password, $user_remember)
 	}
 }
 
+function login_auth_user($auth_user)
+{
+	$query = mysql_query("SELECT * FROM " . global_mysql_users_table . " WHERE user_name='$auth_user'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
+
+	if(mysql_num_rows($query) == 1)
+	{
+			$user = mysql_fetch_array($query);
+
+			$_SESSION['user_id'] = $user['user_id'];
+			$_SESSION['user_is_admin'] = $user['user_is_admin'];
+			$_SESSION['user_email'] = $user['user_email'];
+			$_SESSION['user_phone'] = $user['user_phone'];
+			$_SESSION['user_name'] = $user['user_name'];
+			$_SESSION['user_reservation_reminder'] = $user['user_reservation_reminder'];
+			$_SESSION['logged_in'] = '1';
+
+			if($user_remember == '1')
+			{
+				$user_password = strip_salt($user['user_password']);
+
+				setcookie(global_cookie_prefix . '_user_email', $user['user_email'], time() + 3600 * 24 * intval(global_remember_login_days));
+				setcookie(global_cookie_prefix . '_user_phone', $user['user_phone'], time() + 3600 * 24 * intval(global_remember_login_days));
+				setcookie(global_cookie_prefix . '_user_password', $user_password, time() + 3600 * 24 * intval(global_remember_login_days));
+			}
+
+			return(1);
+	}
+}
+
 function check_login()
 {
 	if(isset($_SESSION['logged_in']))
@@ -196,7 +225,7 @@ function create_user($user_name, $user_email, $user_phone, $user_password, $user
 {
 	if(validate_user_name($user_name) != true)
 	{
-		return('<span class="error_span">Name must be <u>letters only</u> and be <u>2 to 12 letters long</u>. If your name is longer, use a short version of your name</span>');
+		return('<span class="error_span">Name must be <u>alphanumeric only</u> and be <u>3 to 12 letters long</u>. If your name is longer, use a short version of your name</span>');
 	}
 	elseif(validate_user_email($user_email) != true)
 	{
@@ -563,7 +592,7 @@ function change_user_details($user_name, $user_email, $user_phone, $user_passwor
 
 	if(validate_user_name($user_name) != true)
 	{
-		return('<span class="error_span">Name must be <u>letters only</u> and be <u>2 to 12 letters long</u>. If your name is longer, use a short version of your name</span>');
+		return('<span class="error_span">Name must be <u>alphanumeric only</u> and be <u>3 to 12 letters long</u>. If your name is longer, use a short version of your name</span>');
 	}
 	if(validate_user_email($user_email) != true)
 	{
