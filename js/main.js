@@ -870,7 +870,7 @@ $(document).ready( function()
 	$(document).on('click', '#reservation_today_button', function() { showweek(global_week_number, 'today'); });
 	$(document).on('click', '#reset_user_password_button', function() { reset_user_password(); });
 	$(document).on('click', '#change_user_permissions_button', function() { change_user_permissions(); });
-	$(document).on('click', '#change_user_active_button', function() { change_user_permissions(); });
+	$(document).on('click', '#change_user_active_button', function() { change_user_active(); });
 	$(document).on('click', '#delete_user_reservations_button', function() { delete_user_data('reservations'); });
 	$(document).on('click', '#delete_user_button', function() { delete_user_data('user'); });
 	$(document).on('click', '#delete_all_reservations_button', function() { delete_all('reservations'); });
