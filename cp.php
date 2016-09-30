@@ -96,7 +96,7 @@ else
 
 	<div id="usage_div"><?php echo get_usage(); ?></div>
 
-	<p><input type="button" class="blue_button small_button" id="add_one_reservation_button" value="Add 1 to my reservations"></p>
+	<p><input type="button" class="blue_button small_button" id="add_one_reservation_button" value="Add 1 to my reservations" <?= global_enable_add_empty_reservation?:"disabled" ?>></p>
 
 	<p id="usage_message_p"></p>
 

@@ -51,6 +51,9 @@ define('global_currency', '€');
 // How many weeks forward in time to allow reservations
 define('global_weeks_forward', '2');
 
+// Enable add 1 to reservations button
+define('global_enable_add_empty_reservation', 1);
+
 // Days in week
 $global_week_days = array(
         "Monday",

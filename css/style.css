@@ -385,6 +385,11 @@ input.blue_button
 	background-color: #4a8cf6;
 }
 
+input.blue_button:disabled
+{
+	background-color: #caccc6;
+}
+
 input#price_input
 {
 	width: 20px;
