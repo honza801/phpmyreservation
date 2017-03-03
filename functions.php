@@ -569,7 +569,7 @@ function count_reservations($user_id)
 function count_week_reservations($user_id, $week)
 {
 	$query = mysql_query("SELECT * FROM " . global_mysql_reservations_table . " WHERE reservation_user_id='$user_id' and reservation_week='$week'")or die('<span class="error_span"><u>MySQL error:</u> ' . htmlspecialchars(mysql_error()) . '</span>');
-    error_log($query);
+    error_log(mysql_error());
 	$count = mysql_num_rows($query);
 	return($count);
 }
